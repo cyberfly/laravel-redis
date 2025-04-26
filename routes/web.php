@@ -19,12 +19,20 @@ Route::middleware('auth')->group(function () {
 });
 
 // Redis Demo Routes
-Route::prefix('redis-demo')->group(function () {
+Route::prefix('redis-demo')->middleware('auth')->group(function () {
     Route::get('/products', [RedisController::class, 'getProducts']);
     Route::get('/rate-limited', [RedisController::class, 'rateLimitedEndpoint']);
     Route::get('/page-view', [RedisController::class, 'pageView']);
     Route::get('/clear-cache', [RedisController::class, 'clearCache']);
     Route::get('/cache-stats', [RedisController::class, 'getCacheStats']);
+    Route::get('/transactions', function () {
+        return view('redis-transaction');
+    })->name('redis.transactions');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::post('/redis/purchase', [RedisController::class, 'processPurchase']);
+    Route::post('/redis/setup-transaction-test', [RedisController::class, 'setupTransactionTest']);
 });
 
 require __DIR__.'/auth.php';

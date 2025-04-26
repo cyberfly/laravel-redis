@@ -91,6 +91,105 @@ class RedisController extends Controller
     }
 
     /**
+     * Example of Redis Transactions with MULTI/EXEC
+     * Demonstrates atomic operations for a purchase scenario
+     */
+    public function processPurchase(Request $request)
+    {
+        $productId = $request->input('product_id');
+        $userId = $request->input('user_id');
+        $quantity = $request->input('quantity', 1);
+
+        // Keys for Redis
+        $inventoryKey = "inventory:product:{$productId}";
+        $userPointsKey = "user:points:{$userId}";
+        
+        try {
+            // Get current inventory
+            $currentInventory = Redis::get($inventoryKey);
+            
+            // Check if we have enough inventory before starting transaction
+            if ($currentInventory < $quantity) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Insufficient inventory'
+                ], 400);
+            }
+
+            // Watch the keys we're going to modify
+            Redis::watch($inventoryKey);
+            
+            // Start Redis transaction
+            Redis::multi();
+
+            // Decrease inventory
+            Redis::decrby($inventoryKey, $quantity);
+            
+            // Award points for purchase (10 points per item)
+            Redis::incrby($userPointsKey, $quantity * 10);
+            
+            // Execute all commands atomically
+            $results = Redis::exec();
+
+            // Check if transaction was successful
+            if ($results === null) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Transaction failed due to concurrent modification'
+                ], 409);
+            }
+
+            [$newInventory, $newPoints] = $results;
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Purchase processed successfully',
+                'data' => [
+                    'remaining_inventory' => $newInventory,
+                    'user_points' => $newPoints
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            // If anything goes wrong, the transaction will be automatically discarded
+            return response()->json([
+                'success' => false,
+                'message' => 'Purchase failed: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Initialize test data for Redis transaction example
+     */
+    public function setupTransactionTest(Request $request)
+    {
+        $productId = $request->input('product_id', 1);
+        $userId = $request->input('user_id', 1);
+        $initialInventory = $request->input('initial_inventory', 100);
+        $initialPoints = $request->input('initial_points', 0);
+
+        // Keys for Redis
+        $inventoryKey = "inventory:product:{$productId}";
+        $userPointsKey = "user:points:{$userId}";
+
+        // Set initial values
+        Redis::set($inventoryKey, $initialInventory);
+        Redis::set($userPointsKey, $initialPoints);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Test data initialized successfully',
+            'data' => [
+                'product_id' => $productId,
+                'user_id' => $userId,
+                'inventory' => Redis::get($inventoryKey),
+                'user_points' => Redis::get($userPointsKey)
+            ]
+        ]);
+    }
+
+    /**
      * Clear product cache (useful for testing cache misses)
      */
     public function clearCache()
