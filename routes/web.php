@@ -39,6 +39,10 @@ Route::prefix('redis-demo')->middleware('auth')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/redis/purchase', [RedisController::class, 'processPurchase']);
     Route::post('/redis/setup-transaction-test', [RedisController::class, 'setupTransactionTest']);
+    Route::get('/redis-locks', function () {
+        return view('redis-locks');
+    })->name('redis.locks');
+    Route::post('/redis/lock-demo', [RedisController::class, 'lockDemo']);
 });
 
 // Leaderboard routes

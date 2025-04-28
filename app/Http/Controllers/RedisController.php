@@ -313,4 +313,41 @@ class RedisController extends Controller
             'is_typing' => $isTyping
         ]);
     }
+
+    /**
+     * Demonstrate Redis lock functionality
+     */
+    public function lockDemo(Request $request)
+    {
+        $lockKey = 'demo:lock:' . $request->input('resource_id', '1');
+        $lockValue = uniqid(); // Unique identifier for this lock instance
+        
+        // Try to acquire lock
+        $acquired = Redis::set($lockKey, $lockValue, 'NX', 'EX', 10);
+        
+        if (!$acquired) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lock acquisition failed - resource is locked',
+                'lock_key' => $lockKey
+            ]);
+        }
+        
+        try {
+            // Simulate some work
+            sleep(2);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Lock acquired and operation completed successfully',
+                'lock_key' => $lockKey,
+                'lock_value' => $lockValue
+            ]);
+        } finally {
+            // Release the lock if we own it
+            if (Redis::get($lockKey) === $lockValue) {
+                Redis::del($lockKey);
+            }
+        }
+    }
 }

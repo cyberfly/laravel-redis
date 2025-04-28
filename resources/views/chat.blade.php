@@ -12,7 +12,7 @@
                     <div id="chat-window" class="h-96 overflow-y-auto border rounded p-4">
                         <!-- Chat messages will go here -->
                     </div>
-                    
+
                     <div id="typing-indicator" class="text-sm text-gray-500 h-6">
                         <!-- Typing indicator will show here -->
                     </div>
@@ -32,60 +32,60 @@
     </div>
 
     @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const messageInput = document.getElementById('message-input');
-            const typingIndicator = document.getElementById('typing-indicator');
-            let typingTimer;
-            let lastTypingCheck = 0;
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const messageInput = document.getElementById('message-input');
+                const typingIndicator = document.getElementById('typing-indicator');
+                let typingTimer;
+                let lastTypingCheck = 0;
 
-            // Function to notify server that user is typing
-            function notifyTyping() {
-                fetch('/chat/typing', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    }
-                });
-            }
-
-            // Function to check if other user is typing
-            function checkTypingStatus() {
-                // In a real app, you'd get the other user's ID from the chat context
-                const otherUserId = 2; // Example user ID
-                fetch(`/chat/typing/${otherUserId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.is_typing) {
-                            typingIndicator.textContent = 'User is typing...';
-                        } else {
-                            typingIndicator.textContent = '';
+                // Function to notify server that user is typing
+                function notifyTyping() {
+                    fetch('/chat/typing', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                         }
                     });
-            }
-
-            // Set up input event listener for typing indicator
-            messageInput.addEventListener('input', function() {
-                clearTimeout(typingTimer);
-                
-                // Notify that user is typing
-                notifyTyping();
-                
-                // Clear the typing status after 5 seconds of no input
-                typingTimer = setTimeout(() => {
-                    typingIndicator.textContent = '';
-                }, 5000);
-            });
-
-            // Check other user's typing status periodically
-            setInterval(() => {
-                if (Date.now() - lastTypingCheck > 1000) { // Check every second
-                    checkTypingStatus();
-                    lastTypingCheck = Date.now();
                 }
-            }, 1000);
-        });
-    </script>
+
+                // Function to check if other user is typing
+                function checkTypingStatus() {
+                    // In a real app, you'd get the other user's ID from the chat context
+                    const otherUserId = 2; // Example user ID
+                    fetch(`/chat/typing/${otherUserId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.is_typing) {
+                                typingIndicator.textContent = 'User is typing...';
+                            } else {
+                                typingIndicator.textContent = '';
+                            }
+                        });
+                }
+
+                // Set up input event listener for typing indicator
+                messageInput.addEventListener('input', function() {
+                    clearTimeout(typingTimer);
+
+                    // Notify that user is typing
+                    notifyTyping();
+
+                    // Clear the typing status after 5 seconds of no input
+                    typingTimer = setTimeout(() => {
+                        typingIndicator.textContent = '';
+                    }, 5000);
+                });
+
+                // Check other user's typing status periodically
+                setInterval(() => {
+                    if (Date.now() - lastTypingCheck > 1000) { // Check every second
+                        checkTypingStatus();
+                        lastTypingCheck = Date.now();
+                    }
+                }, 1000);
+            });
+        </script>
     @endpush
 </x-app-layout>
