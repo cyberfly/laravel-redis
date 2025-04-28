@@ -21,7 +21,9 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call([
-            ProductSeeder::class
+            ProductSeeder::class,
         ]);
+
+        \App\Models\Sale::factory(10000)->create();
     }
 }
