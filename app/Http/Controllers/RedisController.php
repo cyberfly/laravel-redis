@@ -197,4 +197,93 @@ class RedisController extends Controller
         Redis::del('products:all');
         return response()->json(['message' => 'Cache cleared successfully']);
     }
+
+    /**
+     * Update user score and get leaderboard rankings
+     */
+    public function updateLeaderboard(Request $request)
+    {
+        $userId = $request->input('user_id');
+        $score = $request->input('score');
+        $leaderboardKey = 'leaderboard:global';
+
+        // Update user's score in the sorted set
+        Redis::zadd($leaderboardKey, $score, $userId);
+
+        // Get user's rank (0-based)
+        $rank = Redis::zrevrank($leaderboardKey, $userId);
+
+        // Get top 10 players
+        $topPlayers = Redis::zrevrange($leaderboardKey, 0, 9, 'WITHSCORES');
+        
+        // Format the response
+        $leaderboard = [];
+        $currentIndex = 0;
+        foreach ($topPlayers as $player => $playerScore) {
+            $leaderboard[] = [
+                'rank' => $currentIndex + 1,
+                'user_id' => $player,
+                'score' => $playerScore
+            ];
+            $currentIndex++;
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'user_rank' => $rank + 1, // Convert to 1-based ranking
+                'user_score' => $score,
+                'total_players' => Redis::zcard($leaderboardKey),
+                'top_players' => $leaderboard
+            ]
+        ]);
+    }
+
+    /**
+     * Get nearby players in the leaderboard
+     */
+    public function getNearbyRankings(Request $request)
+    {
+        $userId = $request->input('user_id');
+        $leaderboardKey = 'leaderboard:global';
+        $range = 5; // Number of players to show above and below
+
+        // Get user's rank
+        $userRank = Redis::zrevrank($leaderboardKey, $userId);
+        
+        if ($userRank === null) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found in leaderboard'
+            ], 404);
+        }
+
+        // Calculate range of ranks to fetch
+        $start = max(0, $userRank - $range);
+        $end = $userRank + $range;
+
+        // Get players within range
+        $nearbyPlayers = Redis::zrevrange($leaderboardKey, $start, $end, 'WITHSCORES');
+        
+        // Format the response
+        $rankings = [];
+        $currentRank = $start + 1;
+        foreach ($nearbyPlayers as $player => $score) {
+            $rankings[] = [
+                'rank' => $currentRank,
+                'user_id' => $player,
+                'score' => $score,
+                'is_current_user' => $player == $userId
+            ];
+            $currentRank++;
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'nearby_players' => $rankings,
+                'total_players' => Redis::zcard($leaderboardKey)
+            ]
+        ]);
+    }
 }

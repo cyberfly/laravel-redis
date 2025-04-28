@@ -35,4 +35,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/redis/setup-transaction-test', [RedisController::class, 'setupTransactionTest']);
 });
 
+// Leaderboard routes
+Route::middleware('auth')->group(function () {
+    Route::get('/leaderboard', function () {
+        return view('leaderboard');
+    })->name('leaderboard');
+    Route::post('/leaderboard/update', [RedisController::class, 'updateLeaderboard']);
+    Route::get('/leaderboard/nearby/{user_id}', [RedisController::class, 'getNearbyRankings']);
+});
+
 require __DIR__.'/auth.php';

@@ -18,6 +18,9 @@
                     <x-nav-link :href="route('redis.transactions')" :active="request()->routeIs('redis.transactions')">
                         {{ __('Redis Transactions') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('leaderboard')" :active="request()->routeIs('leaderboard')">
+                        {{ __('Leaderboard') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -83,6 +86,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('redis.transactions')" :active="request()->routeIs('redis.transactions')">
                 {{ __('Redis Transactions') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('leaderboard')" :active="request()->routeIs('leaderboard')">
+                {{ __('Leaderboard') }}
             </x-responsive-nav-link>
         </div>
 
