@@ -50,4 +50,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/leaderboard/nearby/{user_id}', [RedisController::class, 'getNearbyRankings']);
 });
 
+// Chat routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/chat', function () {
+        return view('chat');
+    })->name('chat');
+    
+    Route::post('/chat/typing', [RedisController::class, 'setTypingStatus']);
+    Route::get('/chat/typing/{user}', [RedisController::class, 'getTypingStatus']);
+});
+
 require __DIR__.'/auth.php';

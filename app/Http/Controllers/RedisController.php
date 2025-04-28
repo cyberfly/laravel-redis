@@ -286,4 +286,31 @@ class RedisController extends Controller
             ]
         ]);
     }
+
+    /**
+     * Set user's typing status
+     */
+    public function setTypingStatus(Request $request)
+    {
+        $user = auth()->user();
+        $typingKey = "chat:typing:{$user->id}";
+        
+        // Set typing status with 5-second expiry
+        Redis::setex($typingKey, 5, 'typing');
+        
+        return response()->json(['status' => 'success']);
+    }
+
+    /**
+     * Get user's typing status
+     */
+    public function getTypingStatus($userId)
+    {
+        $typingKey = "chat:typing:{$userId}";
+        $isTyping = Redis::exists($typingKey);
+        
+        return response()->json([
+            'is_typing' => $isTyping
+        ]);
+    }
 }
