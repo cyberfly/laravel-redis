@@ -11,28 +11,44 @@ class ProductSeeder extends Seeder
     {
         $products = [
             [
-                'name' => 'Gaming Laptop',
-                'description' => 'High-performance gaming laptop with RTX 4080',
-                'price' => 1999.99,
-                'stock' => 10,
-                'sku' => 'LAP-GAM-001',
-                'is_active' => true
+                'name' => 'Laptop Pro',
+                'sku' => 'LAP-PRO-001',
+                'description' => 'High-performance laptop for professionals',
+                'price' => 1299.99,
+                'stock' => 50,
+                'category' => 'Electronics'
             ],
             [
                 'name' => 'Wireless Mouse',
-                'description' => 'Ergonomic wireless mouse with long battery life',
-                'price' => 49.99,
+                'sku' => 'ACC-MOU-001',
+                'description' => 'Ergonomic wireless mouse',
+                'price' => 29.99,
                 'stock' => 100,
-                'sku' => 'MOU-WIR-001',
-                'is_active' => true
+                'category' => 'Accessories'
+            ],
+            [
+                'name' => 'External SSD',
+                'sku' => 'STO-SSD-001',
+                'description' => '1TB External Solid State Drive',
+                'price' => 159.99,
+                'stock' => 75,
+                'category' => 'Storage'
+            ],
+            [
+                'name' => 'Gaming Monitor',
+                'sku' => 'MON-GAM-001',
+                'description' => '27" 144Hz Gaming Monitor',
+                'price' => 349.99,
+                'stock' => 30,
+                'category' => 'Electronics'
             ],
             [
                 'name' => 'Mechanical Keyboard',
-                'description' => 'RGB mechanical keyboard with Cherry MX switches',
+                'sku' => 'ACC-KEY-001',
+                'description' => 'RGB Mechanical Gaming Keyboard',
                 'price' => 129.99,
-                'stock' => 50,
-                'sku' => 'KEY-MEC-001',
-                'is_active' => true
+                'stock' => 60,
+                'category' => 'Accessories'
             ]
         ];
 

@@ -43,11 +43,46 @@
                 </div>
             </div>
 
-            <!-- Sales Charts -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                <div class="p-6 bg-white border-b border-gray-200">
-                    <h2 class="text-2xl font-bold mb-4">Monthly Sales Overview</h2>
-                    <canvas id="salesChart" height="100"></canvas>
+            <!-- Sales Charts Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Monthly Sales Overview -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 bg-white border-b border-gray-200">
+                        <h2 class="text-2xl font-bold mb-4">Monthly Sales Overview</h2>
+                        <canvas id="salesChart" height="300"></canvas>
+                    </div>
+                </div>
+
+                <!-- Hourly Sales Distribution -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 bg-white border-b border-gray-200">
+                        <h2 class="text-2xl font-bold mb-4">Hourly Sales Distribution</h2>
+                        <canvas id="hourlyChart" height="300"></canvas>
+                    </div>
+                </div>
+
+                <!-- Weekly Sales Comparison -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 bg-white border-b border-gray-200">
+                        <h2 class="text-2xl font-bold mb-4">Weekly Sales Pattern</h2>
+                        <canvas id="weeklyChart" height="300"></canvas>
+                    </div>
+                </div>
+
+                <!-- Category Distribution -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 bg-white border-b border-gray-200">
+                        <h2 class="text-2xl font-bold mb-4">Sales by Category</h2>
+                        <canvas id="categoryChart" height="300"></canvas>
+                    </div>
+                </div>
+
+                <!-- Price Range Distribution -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 bg-white border-b border-gray-200">
+                        <h2 class="text-2xl font-bold mb-4">Sales by Price Range</h2>
+                        <canvas id="priceRangeChart" height="300"></canvas>
+                    </div>
                 </div>
             </div>
 
@@ -138,27 +173,31 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
             const monthlyData = @json($monthlyData);
+            const hourlySales = @json($hourlySales);
+            const weeklySales = @json($weeklySales);
+            const categoryDistribution = @json($categoryDistribution);
+            const priceRanges = @json($priceRanges);
 
+            // Monthly Sales Chart
             const ctx = document.getElementById('salesChart').getContext('2d');
             new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: monthlyData.map(data => data.month),
                     datasets: [{
-                            label: 'Monthly Sales ($)',
-                            data: monthlyData.map(data => data.total_sales),
-                            borderColor: 'rgb(75, 192, 192)',
-                            tension: 0.1,
-                            yAxisID: 'y'
-                        },
-                        {
-                            label: 'Number of Sales',
-                            data: monthlyData.map(data => data.number_of_sales),
-                            borderColor: 'rgb(153, 102, 255)',
-                            tension: 0.1,
-                            yAxisID: 'y1'
-                        }
-                    ]
+                        label: 'Monthly Sales ($)',
+                        data: monthlyData.map(data => data.total_sales),
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Number of Sales',
+                        data: monthlyData.map(data => data.number_of_sales),
+                        borderColor: 'rgb(153, 102, 255)',
+                        tension: 0.1,
+                        yAxisID: 'y1'
+                    }]
                 },
                 options: {
                     responsive: true,
@@ -187,6 +226,151 @@
                             grid: {
                                 drawOnChartArea: false
                             }
+                        }
+                    }
+                }
+            });
+
+            // Hourly Sales Distribution Chart
+            const hourlyCtx = document.getElementById('hourlyChart').getContext('2d');
+            new Chart(hourlyCtx, {
+                type: 'bar',
+                data: {
+                    labels: hourlySales.map(data => `${data.hour}:00`),
+                    datasets: [{
+                        label: 'Number of Sales',
+                        data: hourlySales.map(data => data.total_sales),
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgb(54, 162, 235)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Revenue ($)',
+                        data: hourlySales.map(data => data.revenue),
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        borderWidth: 1,
+                        yAxisID: 'revenue'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Sales'
+                            }
+                        },
+                        revenue: {
+                            position: 'right',
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Revenue ($)'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Weekly Sales Pattern Chart
+            const weeklyCtx = document.getElementById('weeklyChart').getContext('2d');
+            new Chart(weeklyCtx, {
+                type: 'radar',
+                data: {
+                    labels: weeklySales.map(data => data.day),
+                    datasets: [{
+                        label: 'Total Sales ($)',
+                        data: weeklySales.map(data => data.total_sales),
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgb(75, 192, 192)',
+                        pointBackgroundColor: 'rgb(75, 192, 192)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(75, 192, 192)'
+                    },
+                    {
+                        label: 'Average Sale Value ($)',
+                        data: weeklySales.map(data => data.avg_sale_value),
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        pointBackgroundColor: 'rgb(255, 99, 132)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(255, 99, 132)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        r: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Category Distribution Chart
+            const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+            new Chart(categoryCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: categoryDistribution.map(data => data.category),
+                    datasets: [{
+                        data: categoryDistribution.map(data => data.total_revenue),
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Revenue by Category'
+                        }
+                    }
+                }
+            });
+
+            // Price Range Distribution Chart
+            const priceRangeCtx = document.getElementById('priceRangeChart').getContext('2d');
+            new Chart(priceRangeCtx, {
+                type: 'polarArea',
+                data: {
+                    labels: priceRanges.map(data => data.price_range),
+                    datasets: [{
+                        data: priceRanges.map(data => data.total_sales),
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.5)',
+                            'rgba(54, 162, 235, 0.5)',
+                            'rgba(255, 206, 86, 0.5)',
+                            'rgba(75, 192, 192, 0.5)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Sales Distribution by Price Range'
                         }
                     }
                 }
